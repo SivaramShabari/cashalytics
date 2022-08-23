@@ -6,9 +6,9 @@ import {
 	StatLabel,
 	StatNumber,
 	useColorModeValue,
-	Tag,
+	Tag as TagUI,
 	TagLabel,
-	TagRightIcon,
+	Checkbox,
 	Menu,
 	MenuButton,
 	MenuList,
@@ -18,26 +18,33 @@ import {
 	Text,
 	Wrap,
 } from "@chakra-ui/react";
-import { Category, Transaction } from "@prisma/client";
+import { Tag, Transaction } from "@prisma/client";
 import { BsFillCalendar2CheckFill } from "react-icons/bs";
-import { BsPlusLg } from "react-icons/bs";
 import { AiFillCaretDown } from "react-icons/ai";
 import moment from "moment";
-import { IconType } from "react-icons";
 import { TransactionTypes } from "../../types/transaction";
+import { useState, useContext, useEffect, useCallback } from "react";
+import { DataContext } from "../../pages/manage-data";
 export default function TransactionListItem({
-	isSelected,
 	transaction,
-	setSelectedIds,
-	categories,
+	tags,
 }: {
-	isSelected: boolean;
 	transaction: Transaction;
-	setSelectedIds: any;
-	categories: Category[];
+	tags: Tag[];
 }) {
+	const { selectedIds, setSelectedIds } = useContext(DataContext);
 	const borderColor = useColorModeValue("gray.200", "gray.700");
 	const bg = useColorModeValue("blue.50", "blue.900");
+	const [isSelectedLocal, setisSelectedLocal] = useState(false);
+
+	// const selectItem = useCallback((id: string) => {
+	// 	setisSelectedLocal((iS) => !iS);
+	// 	selectedIds.includes(id)
+	// 		? setSelectedIds((ids: string[]) =>
+	// 				ids.filter((id) => id !== transaction.id)
+	// 		  )
+	// 		: setSelectedIds((ids: string[]) => [...ids, transaction.id]);
+	// }, []);
 
 	return (
 		<>
@@ -47,22 +54,20 @@ export default function TransactionListItem({
 				p={5}
 				borderRadius="lg"
 				borderWidth={2}
-				bg={isSelected ? bg : undefined}
-				borderColor={isSelected ? "blue.500" : borderColor}
-				onDoubleClick={() => {
-					alert("double click");
-				}}
-				onClick={() =>
-					isSelected
-						? setSelectedIds((ids: string[]) =>
-								ids.filter((id) => id !== transaction.id)
-						  )
-						: setSelectedIds((ids: string[]) => [...ids, transaction.id])
-				}
+				bg={isSelectedLocal ? bg : undefined}
+				borderColor={isSelectedLocal ? "blue.500" : borderColor}
 			>
 				<StatGroup>
 					<Stat>
 						<StatLabel>
+							<Checkbox
+								mt={0.5}
+								mr={2}
+								size="lg"
+								// isChecked={isSelected}
+								onChange={() => setisSelectedLocal((i) => !i)}
+								// onChange={(e) => selectItem(transaction.id)}
+							/>
 							<TransactionTypeMenu
 								selectedType={transaction.type}
 								types={TransactionTypes}
@@ -84,13 +89,12 @@ export default function TransactionListItem({
 						</StatLabel>
 						<StatNumber mt={2}>
 							<Wrap gap={1}>
-								{transaction.categories.map((category, i) => (
-									<Tag key={i} variant="outline" size="md" colorScheme="blue">
+								{transaction.tags.map((tag, i) => (
+									<TagUI key={i} variant="outline" size="md" colorScheme="blue">
 										<TagLabel>
-											{categories.find((t) => t.id === category)?.name ||
-												"INVALID"}
+											{tags.find((t) => t.id === tag)?.name || "INVALID"}
 										</TagLabel>
-									</Tag>
+									</TagUI>
 								))}
 							</Wrap>
 						</StatNumber>
@@ -136,13 +140,16 @@ const TransactionTypeMenu = ({
 	selectedType: string;
 	types: string[];
 }) => {
-	const income = useColorModeValue("green.400", "green.600");
+	const income = useColorModeValue("green.400", "green.500");
 	const expense = useColorModeValue("yellow.500", "yellow.600");
 	return (
 		<Menu>
 			<MenuButton onClick={(e: any) => e.stopPropagation()}>
 				<Flex>
-					<Text color={selectedType === "INCOME" ? income : expense}>
+					<Text
+						fontWeight="bold"
+						color={selectedType === "Credit" ? income : expense}
+					>
 						{selectedType}
 					</Text>
 					<Box mt={1} ml={1}>

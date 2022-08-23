@@ -15,23 +15,31 @@ model User {
   name          String
   email         String         @unique
   emailVerified DateTime?
-  accounts      Account[]
-  moneyAccounts MoneyAccount[]
   image         String?
-  sessions      Session[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  DOB           DateTime?
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zip           String?
+  country       String?
+  accounts      Account[]
+  sessions      Session[]
+  tags          Tag[]
   transactions  Transaction[]
-  Category      Category[]
+  moneyAccounts MoneyAccount[]
 }
 
 model MoneyAccount {
   id           String        @id @default(auto()) @map("_id") @db.ObjectId
   name         String
-  BankName     String?
+  bankName     String?
   createdAt    DateTime      @default(now())
+  balance      Float         @default(0.00)
   updatedAt    DateTime      @updatedAt
-  Description  String
+  description  String
   user         User          @relation(fields: [userId], references: [id])
   userId       String        @map("userId")
   transactions Transaction[]
@@ -44,34 +52,37 @@ model Transaction {
   user           User         @relation(fields: [userId], references: [id])
   userId         String       @map("userId") @db.ObjectId
   amount         Float
-  medium         Medium
-  MoneyAccount   MoneyAccount @relation(fields: [moneyAccountId], references: [id])
-  moneyAccountId String       @map("accountId") @db.ObjectId
   createdAt      DateTime     @default(now())
   narration      String?
   updatedAt      DateTime     @updatedAt
   reference      String?
-  categories     String[]
   isArchived     Boolean      @default(false)
   description    String
+  account        MoneyAccount @relation(fields: [accountId], references: [id])
+  accountId      String       @db.ObjectId
   closingBalance Float
+  tags           String[]
 }
 
-model Category {
+model Tag {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   user      User     @relation(fields: [userId], references: [id])
   userId    String   @db.ObjectId
   name      String
-  icon      String
-  color     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
+enum Type {
+  Credit
+  Debit
+}
+
 model Account {
   id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String
   type              String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String  @db.ObjectId
   provider          String
   providerAccountId String
   refresh_token     String?
@@ -82,9 +93,7 @@ model Account {
   id_token          String?
   session_state     String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId], name: "provider_providerAccountId")
 }
 
 model Session {
@@ -100,29 +109,4 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
-}
-
-enum Medium {
-  UPI
-  NEFT
-  RTGS
-  IMPS
-  CASH
-  CHEQUE
-  CREDIT_CARD
-  DEBIT_CARD
-  NET_BANKING
-  OTHER
-}
-
-enum Type {
-  UNKNOWN
-  INCOME
-  EXPENSE
-  LENDING
-  BORROWING
-  MIDDLE_ACCOUNT_AMOUNT_TRANSFER
-  TALLY_LENDING
-  TALLY_BORROWING
-  TALLY_MIDDLE_ACCOUNT_AMOUNT_TRANSFER
 }

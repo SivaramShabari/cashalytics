@@ -6,10 +6,12 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionProvider } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import prisma from "./api/prisma";
 
 function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
 	const [queryClient] = useState(() => new QueryClient());
+
 	return (
 		<SessionProvider session={session}>
 			<ChakraProvider theme={theme}>

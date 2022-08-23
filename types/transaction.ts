@@ -25,14 +25,4 @@ const transactionSchema = z.object({
 	reference: z.string().optional(),
 });
 
-export const TransactionTypes = [
-	"UNKNOWN",
-	"INCOME",
-	"EXPENSE",
-	"LENDING",
-	"BORROWING",
-	"MIDDLE_ACCOUNT_AMOUNT_TRANSFER",
-	"TALLY_LENDING",
-	"TALLY_BORROWING",
-	"TALLY_MIDDLE_ACCOUNT_AMOUNT_TRANSFER",
-];
+export const TransactionTypes = ["Debit", "Credit"];

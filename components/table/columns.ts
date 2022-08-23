@@ -1,14 +1,9 @@
 import { Transaction } from "@prisma/client";
 import { createColumnHelper } from "@tanstack/react-table";
 import moment from "moment";
-import { Text } from "@chakra-ui/react";
 const columnHelper = createColumnHelper<Transaction>();
 
 const columns = [
-	columnHelper.accessor("type", {
-		id: "type",
-		header: "Type",
-	}),
 	columnHelper.accessor("date", {
 		id: "date",
 		header: "Date",
@@ -29,6 +24,10 @@ const columns = [
 	columnHelper.accessor("description", {
 		id: "description",
 		header: "Description",
+	}),
+	columnHelper.accessor("narration", {
+		id: "narration",
+		header: "Narration",
 	}),
 ];
 

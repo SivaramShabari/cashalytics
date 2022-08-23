@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-table";
 import { Th } from "@chakra-ui/react";
 import { useDrag, useDrop } from "react-dnd";
-import { Transaction } from "@prisma/client";
 
 const reorderColumn = (
 	draggedColumnId: string,
@@ -25,8 +24,8 @@ const reorderColumn = (
 };
 
 const DraggableColumnHeader: FC<{
-	header: Header<Transaction, unknown>;
-	table: Table<Transaction>;
+	header: Header<any, unknown>;
+	table: Table<any>;
 }> = ({ header, table }) => {
 	const { getState, setColumnOrder } = table;
 	const { columnOrder } = getState();
@@ -34,7 +33,7 @@ const DraggableColumnHeader: FC<{
 
 	const [, dropRef] = useDrop({
 		accept: "column",
-		drop: (draggedColumn: Column<Transaction>) => {
+		drop: (draggedColumn: Column<any>) => {
 			const newColumnOrder = reorderColumn(
 				draggedColumn.id,
 				column.id,

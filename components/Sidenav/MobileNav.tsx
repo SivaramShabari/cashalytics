@@ -56,7 +56,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
 				<ToggleColorMode />
 				{/* <IconButton
 					size="lg"
-					variant="ghost"
+					variant="outline"
 					aria-label="open menu"
 					icon={<FiBell />}
 				/> */}

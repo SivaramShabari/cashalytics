@@ -6,7 +6,7 @@ export default function ToggleColorMode() {
 		<>
 			<IconButton
 				size="lg"
-				variant="ghost"
+				variant="outline"
 				aria-label="open menu"
 				onClick={toggleColorMode}
 				icon={

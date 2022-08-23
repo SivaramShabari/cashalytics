@@ -1,25 +1,25 @@
-import { TransactionType } from "@prisma/client";
+import { Type } from "@prisma/client";
 
 export interface filters {
 	count?: number;
+	tags?: string[];
+	search?: string;
+	categories?: string[];
+	type?: Type;
+	orderBy?: {
+		field?: string;
+		direction?: "asc" | "desc";
+	};
 	paginate?: {
 		page: number;
 		perPage: number;
 	};
-	category?: string;
-	search?: string;
-	orderBy?: {
-		field: string;
-		direction: "asc" | "desc";
-	};
 	amount?: {
-		minAmount: number;
-		maxAmount: number;
+		minAmount?: number;
+		maxAmount?: number;
 	};
-	categories?: string[];
-	type?: TransactionType;
 	date?: {
-		from: Date;
-		to: Date;
+		from: any;
+		to: any;
 	};
 }

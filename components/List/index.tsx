@@ -1,38 +1,64 @@
-import { Box, Flex, Text } from "@chakra-ui/react";
-import { Category, Transaction } from "@prisma/client";
-import { useState } from "react";
+import { Box, Flex, useColorModeValue } from "@chakra-ui/react";
+import { Tag, Transaction } from "@prisma/client";
+import { useState, useContext, useEffect } from "react";
+import { DataContext } from "../../pages/manage-data";
 import TransactionListItem from "./TransactionListItem";
 
 export default function TransactionList({
 	transactions,
-	categories,
+	tags,
 }: {
 	transactions: Transaction[];
-	categories: Category[];
+	tags: Tag[];
 }) {
-	const [selectedIds, setSelectedIds] = useState<string[]>([]);
+	const text = useColorModeValue("blue.500", "blue.300");
 	return (
 		<>
 			<Box m={3}>
 				<Box>
-					<Flex>
-						<Text color="blue.500" fontWeight={"bold"} variant={"h3"}>
+					<Flex
+						gap={3}
+						alignItems="stretch"
+						justifyContent="space-between"
+						w="100%"
+					>
+						<Box color={text} fontWeight={"bold"}>
 							Selected:
-						</Text>
-						<Text ml={2} fontWeight={"bold"} variant={"h3"}>
-							{selectedIds.length}
-						</Text>
+							<Flex fontWeight={"bold"} display="inline" ml={2}>
+								0
+							</Flex>
+						</Box>
+						<Box color={text} fontWeight={"bold"}>
+							Total:
+							<Flex fontWeight={"bold"} display="inline" ml={2}>
+								{transactions.length}
+							</Flex>
+						</Box>
+						<Box color={text} fontWeight={"bold"}>
+							Debit:
+							<Flex fontWeight={"bold"} display="inline" ml={2}>
+								₹
+								{transactions
+									.filter((t) => t.type === "Debit")
+									.reduce((a, b) => a + b.amount, 0)
+									.toLocaleString("en-IN")}
+							</Flex>
+						</Box>
+						<Box color={text} fontWeight={"bold"}>
+							Credit:
+							<Flex fontWeight={"bold"} display="inline" ml={2}>
+								₹
+								{transactions
+									.filter((t) => t.type === "Credit")
+									.reduce((a, b) => a + b.amount, 0)
+									.toLocaleString("en-IN")}
+							</Flex>
+						</Box>
 					</Flex>
 				</Box>
 			</Box>
 			{transactions.map((transaction, i) => (
-				<TransactionListItem
-					key={i}
-					isSelected={selectedIds?.includes(transaction.id)}
-					transaction={transaction}
-					setSelectedIds={setSelectedIds}
-					categories={categories}
-				/>
+				<TransactionListItem key={i} transaction={transaction} tags={tags} />
 			))}
 		</>
 	);
