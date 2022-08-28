@@ -6,9 +6,12 @@ import {
 	Text,
 	BoxProps,
 } from "@chakra-ui/react";
-import { FiHome, FiTrendingUp, FiCompass, FiSettings } from "react-icons/fi";
+import { FiHome, FiSettings, FiTag } from "react-icons/fi";
+import { TbTransferIn } from "react-icons/tb";
 import { IconType } from "react-icons";
 import NavItem from "./NavItem";
+import { RiBankCardLine } from "react-icons/ri";
+import { MdOutlineDashboard } from "react-icons/md";
 
 interface SidebarProps extends BoxProps {
 	onClose: () => void;
@@ -19,9 +22,10 @@ interface LinkItemProps {
 	route: string;
 }
 const LinkItems: Array<LinkItemProps> = [
-	{ name: "Dashboard", icon: FiHome, route: "/" },
-	{ name: "Table View", icon: FiTrendingUp, route: "table-view" },
-	{ name: "Manage Data", icon: FiCompass, route: "manage-data" },
+	{ name: "Dashboard", icon: MdOutlineDashboard, route: "/" },
+	{ name: "Transactions", icon: TbTransferIn, route: "transactions" },
+	{ name: "Tags", icon: FiTag, route: "tags" },
+	{ name: "Accounts", icon: RiBankCardLine, route: "accounts" },
 	{ name: "Settings", icon: FiSettings, route: "settings" },
 ];
 

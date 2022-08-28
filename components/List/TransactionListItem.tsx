@@ -8,23 +8,24 @@ import {
 	useColorModeValue,
 	Tag as TagUI,
 	TagLabel,
-	Checkbox,
-	Menu,
-	MenuButton,
-	MenuList,
-	MenuItem,
-	Button,
-	Box,
-	Text,
 	Wrap,
+	Modal,
+	ModalOverlay,
+	ModalContent,
+	ModalHeader,
+	ModalCloseButton,
+	ModalBody,
+	ModalFooter,
+	Button,
+	useDisclosure,
 } from "@chakra-ui/react";
 import { Tag, Transaction } from "@prisma/client";
 import { BsFillCalendar2CheckFill } from "react-icons/bs";
-import { AiFillCaretDown } from "react-icons/ai";
 import moment from "moment";
-import { TransactionTypes } from "../../types/transaction";
-import { useState, useContext, useEffect, useCallback } from "react";
-import { DataContext } from "../../pages/manage-data";
+import EditTransactionForm from "../EditTransactionForm";
+import { useContext, useState } from "react";
+import { DataContext } from "../../pages/transactions";
+import { useEditAccount, useEditTransactions, useGetAccounts } from "../../api";
 export default function TransactionListItem({
 	transaction,
 	tags,
@@ -32,65 +33,52 @@ export default function TransactionListItem({
 	transaction: Transaction;
 	tags: Tag[];
 }) {
-	const { selectedIds, setSelectedIds } = useContext(DataContext);
-	const borderColor = useColorModeValue("gray.200", "gray.700");
-	const bg = useColorModeValue("blue.50", "blue.900");
-	const [isSelectedLocal, setisSelectedLocal] = useState(false);
+	const income = useColorModeValue("green.400", "green.500");
+	const expense = useColorModeValue("yellow.500", "yellow.600");
+	const { isOpen, onOpen, onClose } = useDisclosure();
+	const [values, set] = useState<Transaction>(transaction);
 
-	// const selectItem = useCallback((id: string) => {
-	// 	setisSelectedLocal((iS) => !iS);
-	// 	selectedIds.includes(id)
-	// 		? setSelectedIds((ids: string[]) =>
-	// 				ids.filter((id) => id !== transaction.id)
-	// 		  )
-	// 		: setSelectedIds((ids: string[]) => [...ids, transaction.id]);
-	// }, []);
-
+	const updateTransaction = useEditTransactions();
+	const updateAccount = useEditAccount();
+	const accounts = useGetAccounts();
+	const amountString = parseFloat(transaction.amount.toString()).toLocaleString(
+		"en-in"
+	);
 	return (
 		<>
 			<Flex
 				flexDirection="column"
-				m={3}
-				p={5}
+				py={2}
+				px={3}
 				borderRadius="lg"
-				borderWidth={2}
-				bg={isSelectedLocal ? bg : undefined}
-				borderColor={isSelectedLocal ? "blue.500" : borderColor}
+				borderWidth={1}
+				onClick={onOpen}
+				_hover={{ cursor: "pointer" }}
 			>
 				<StatGroup>
 					<Stat>
-						<StatLabel>
-							<Checkbox
-								mt={0.5}
-								mr={2}
-								size="lg"
-								// isChecked={isSelected}
-								onChange={() => setisSelectedLocal((i) => !i)}
-								// onChange={(e) => selectItem(transaction.id)}
-							/>
-							<TransactionTypeMenu
-								selectedType={transaction.type}
-								types={TransactionTypes}
-							/>
-						</StatLabel>
-						<StatNumber>
-							{parseFloat(transaction.amount.toString()).toFixed(2)} ₹
+						<StatNumber
+							color={transaction.type === "Credit" ? income : expense}
+						>
+							{amountString.includes(".") ? amountString : amountString + ".00"}{" "}
+							₹
 						</StatNumber>
 						<StatHelpText>
 							<Flex gap={1} align="right">
 								<BsFillCalendar2CheckFill style={{ margin: 3 }} />
-								{moment(transaction.date).format("ll")}
+								{moment(transaction.date).format("ll")}{" "}
+								{moment(transaction.date).format("dddd")}
 							</Flex>
 						</StatHelpText>
 					</Stat>
 					<Stat>
-						<StatLabel sx={{ base: { ml: 2 }, md: { ml: 0 } }}>
-							Category
+						<StatLabel mt={1} sx={{ base: { ml: 2 }, md: { ml: 0 } }}>
+							Tags
 						</StatLabel>
 						<StatNumber mt={2}>
 							<Wrap gap={1}>
 								{transaction.tags.map((tag, i) => (
-									<TagUI key={i} variant="outline" size="md" colorScheme="blue">
+									<TagUI key={i} variant="outline" size="sm" colorScheme="blue">
 										<TagLabel>
 											{tags.find((t) => t.id === tag)?.name || "INVALID"}
 										</TagLabel>
@@ -100,7 +88,7 @@ export default function TransactionListItem({
 						</StatNumber>
 					</Stat>
 				</StatGroup>
-				<Stat mt={3}>
+				<Stat mt={1}>
 					<StatLabel>Description</StatLabel>
 					<StatNumber></StatNumber>
 					<StatHelpText>
@@ -109,61 +97,83 @@ export default function TransactionListItem({
 							"No description"}
 					</StatHelpText>
 				</Stat>
-				<Flex gap={2} w={["full", 200]}>
-					<Button
-						onClick={(e: any) => e.stopPropagation()}
-						size="sm"
-						colorScheme="blue"
-						flexGrow={{ base: 1, md: 1 }}
-					>
-						Edit
-					</Button>
-					<Button
-						onClick={(e: any) => e.stopPropagation()}
-						size="sm"
-						colorScheme="orange"
-						variant="outline"
-						flexGrow={{ base: 1, md: 1 }}
-					>
-						Archive
-					</Button>
-				</Flex>
 			</Flex>
+			<>
+				<Modal
+					scrollBehavior={"inside"}
+					onClose={onClose}
+					isOpen={isOpen}
+					isCentered
+					size="xl"
+					id={transaction.id}
+				>
+					<ModalOverlay />
+					<ModalContent id={transaction.id}>
+						<ModalHeader>Edit Transaction</ModalHeader>
+						<ModalCloseButton />
+						<ModalBody>
+							<EditTransactionForm
+								set={set}
+								values={values}
+								transaction={transaction}
+								tags={tags}
+							/>
+						</ModalBody>
+						<ModalFooter>
+							<Flex>
+								<Button
+									variant="outline"
+									colorScheme="red"
+									mr={3}
+									onClick={onClose}
+								>
+									Close
+								</Button>
+								<Button
+									variant="outline"
+									colorScheme="orange"
+									mr={3}
+									onClick={onClose}
+								>
+									Archive
+								</Button>
+								<Button
+									isLoading={
+										updateAccount.isLoading || updateTransaction.isLoading
+									}
+									variant="solid"
+									colorScheme="green"
+									onClick={() => {
+										let amountDifference = transaction.amount - values.amount;
+										const type = values.type === "Debit" ? -1 : 1;
+										amountDifference *= type;
+										const account = accounts.data?.data.find(
+											(a) => a.id === values.accountId
+										);
+										const balance = account!.balance - amountDifference;
+										updateTransaction
+											.mutateAsync([{ ...values }])
+											.then(() => {
+												if (amountDifference > 0) {
+													return updateAccount.mutateAsync({
+														...(account as any),
+														balance,
+													});
+												} else return null;
+											})
+											.then(() => {
+												onClose();
+											})
+											.catch(console.log);
+									}}
+								>
+									Save
+								</Button>
+							</Flex>
+						</ModalFooter>
+					</ModalContent>
+				</Modal>
+			</>
 		</>
 	);
 }
-
-const TransactionTypeMenu = ({
-	selectedType,
-	types,
-}: {
-	selectedType: string;
-	types: string[];
-}) => {
-	const income = useColorModeValue("green.400", "green.500");
-	const expense = useColorModeValue("yellow.500", "yellow.600");
-	return (
-		<Menu>
-			<MenuButton onClick={(e: any) => e.stopPropagation()}>
-				<Flex>
-					<Text
-						fontWeight="bold"
-						color={selectedType === "Credit" ? income : expense}
-					>
-						{selectedType}
-					</Text>
-					<Box mt={1} ml={1}>
-						<AiFillCaretDown />
-					</Box>
-				</Flex>
-			</MenuButton>
-			<MenuList>
-				{types.map((type, i) => (
-					<MenuItem onClick={(e: any) => e.stopPropagation()} key={i}>
-						{type}
-					</MenuItem>
-				))}
-			</MenuList>
-		</Menu>
-	);
-};

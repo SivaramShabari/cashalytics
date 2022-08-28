@@ -23,13 +23,14 @@ export default async function handler(
 						},
 					},
 				});
-				prisma.$disconnect();
+
 				res.json(tags);
 			}
 		}
 	} catch (e) {
 		console.log(e);
-		prisma.$disconnect();
+
 		res.status(509).json({ message: "Server error" });
+	} finally {
 	}
 }

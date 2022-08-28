@@ -6,6 +6,7 @@ export interface filters {
 	search?: string;
 	categories?: string[];
 	type?: Type;
+	account?: string;
 	orderBy?: {
 		field?: string;
 		direction?: "asc" | "desc";

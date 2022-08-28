@@ -49,13 +49,13 @@ export default async function handler(
 				}
 				if (queries.from || queries.to) {
 					filters["date"] = {
-						from: new Date((queries.from as string) || ""),
-						to: new Date((queries.to as string) || ""),
+						from: new Date((queries.from as string) || "2021-08-08"),
+						to: new Date(queries.to as string),
 					};
 				}
 				let where: any = {};
 				if (filters.type) where.type = { equals: filters.type };
-				if (filters.tags) where.tags = { in: filters.tags };
+				if (filters.tags) where.tags = { hasSome: filters.tags };
 				if (filters.search)
 					where.OR = [
 						{ description: { contains: filters.search.toString().trim() } },
@@ -98,13 +98,14 @@ export default async function handler(
 						(filters.paginate.page - 1) * filters.paginate.perPage,
 				});
 				const count = await prisma.transaction.count();
-				prisma.$disconnect();
+
 				res.status(200).json({ transactions, count });
 			}
 		}
 	} catch (error) {
 		console.log("Error:", error);
-		prisma.$disconnect();
+
 		res.status(500).json({ error });
+	} finally {
 	}
 }

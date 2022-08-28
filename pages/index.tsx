@@ -1,41 +1,24 @@
-import { Grid } from "@chakra-ui/react";
 import type { GetServerSideProps, NextPage } from "next";
-import { useSession, getSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import SidebarWithHeader from "../components/Sidenav";
 
 const Home: NextPage = () => {
-	const { data: session } = useSession();
+	const session = useSession();
+	const router = useRouter();
+	useEffect(() => {
+		if (session.status === "unauthenticated") {
+			router.push("/signin");
+		}
+	}, [session, router]);
 	return (
 		<>
 			<SidebarWithHeader>
-				<Grid></Grid>
+				<></>
 			</SidebarWithHeader>
 		</>
 	);
 };
 
 export default Home;
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	try {
-		const session = await getSession(context);
-		if (!session)
-			return {
-				redirect: {
-					destination: "/signin",
-					permanent: false,
-				},
-			};
-		return {
-			props: {
-				session,
-			},
-		};
-	} catch (err) {
-		console.log(err);
-		alert(err);
-		return {
-			props: {},
-		};
-	}
-};

@@ -17,17 +17,28 @@ import {
 	Text,
 	useColorModeValue,
 } from "@chakra-ui/react";
-import { Transaction } from "@prisma/client";
+import { MoneyAccount, Tag as TagType, Transaction } from "@prisma/client";
 import moment from "moment";
-import { useContext, useState } from "react";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
 import { AiFillCaretDown } from "react-icons/ai";
 import { MdClose } from "react-icons/md";
-import { DataContext } from "../pages/table-view";
+import { useCreateTag, useGetAccounts } from "../api";
 
-function EditTransactionForm({ transaction }: { transaction: Transaction }) {
-	const [values, set] = useState<Transaction>(transaction);
-	const { tags } = useContext(DataContext);
+function EditTransactionForm({
+	transaction,
+	values,
+	set,
+	tags,
+}: {
+	transaction: Transaction;
+	values: Transaction;
+	set: Dispatch<SetStateAction<Transaction>>;
+	tags: TagType[];
+}) {
 	const label = useColorModeValue("blue.600", "blue.300");
+	const createtag = useCreateTag();
+	const accounts = useGetAccounts();
+	const [locak, setNewTag] = useState(false);
 	return (
 		<div>
 			<Stack spacing={6}>
@@ -56,9 +67,12 @@ function EditTransactionForm({ transaction }: { transaction: Transaction }) {
 								>
 									<TagLabel>
 										<Flex gap={1}>
-											<Text></Text>
-											{tags?.find((tag) => t === tag.id)?.name}
-											<MdClose style={{ marginTop: 1 }} />
+											<Text _hover={{ color: "white" }}>
+												{tags?.find((tag) => t === tag.id)?.name}
+											</Text>
+											<Text mt={0.5} fontWeight={"bold"}>
+												<MdClose />
+											</Text>
 										</Flex>
 									</TagLabel>
 								</Tag>
@@ -74,11 +88,12 @@ function EditTransactionForm({ transaction }: { transaction: Transaction }) {
 									</TagLabel>
 								</Tag>
 							</MenuButton>
-							<MenuList overflow={"clip"} position={"fixed"}>
+
+							<MenuList position={"fixed"}>
 								<Wrap p={2}>
 									{tags.map((tag) => (
 										<Tag
-											_hover={{ cursor: "pointer" }}
+											_hover={{ cursor: "pointer", border: "1px solid" }}
 											colorScheme="blue"
 											onClick={() => {
 												if (!values.tags.includes(tag.id)) {
@@ -94,6 +109,11 @@ function EditTransactionForm({ transaction }: { transaction: Transaction }) {
 							</MenuList>
 						</Menu>
 					</Box>
+					{/* <Tag my={2} variant={"outline"} colorScheme="yellow">
+						<TagLabel>
+							Create New Tag <b>+</b>
+						</TagLabel>
+					</Tag> */}
 				</FormControl>
 				<FormControl>
 					<FormLabel color={label}>Type</FormLabel>
@@ -127,7 +147,55 @@ function EditTransactionForm({ transaction }: { transaction: Transaction }) {
 				</FormControl>
 				<FormControl>
 					<FormLabel color={label}>Amount</FormLabel>
-					<Input value={values.amount} type="number" />
+					<Input
+						value={values.amount}
+						onChange={(e) => {
+							set((t) => ({
+								...t,
+								amount: parseFloat(e.target.value),
+							}));
+						}}
+						type="number"
+					/>
+				</FormControl>
+				<FormControl>
+					<FormLabel color={label}>Closing Balance</FormLabel>
+					<Input
+						value={values.closingBalance}
+						onChange={(e) => {
+							set((t) => ({
+								...t,
+								closingBalance: parseFloat(e.target.value),
+							}));
+						}}
+						type="number"
+					/>
+				</FormControl>
+				<FormControl>
+					<FormLabel color={label}>Account</FormLabel>
+					<Menu>
+						<MenuButton as={Button} rightIcon={<AiFillCaretDown />}>
+							{accounts.data?.data.find(
+								(accnt) => accnt.id === values.accountId
+							)?.name || "Invalid"}{" "}
+							Account
+						</MenuButton>
+						<MenuList>
+							{accounts.data?.data.map((account: MoneyAccount) => (
+								<MenuItem
+									key={account.id}
+									onClick={() =>
+										set((t) => ({
+											...t,
+											accountId: account.id,
+										}))
+									}
+								>
+									{account.name}
+								</MenuItem>
+							))}
+						</MenuList>
+					</Menu>
 				</FormControl>
 
 				<FormControl>
@@ -155,13 +223,22 @@ function EditTransactionForm({ transaction }: { transaction: Transaction }) {
 					/>
 				</FormControl>
 				<FormControl>
+					<FormLabel color={label}>Narration</FormLabel>
+					<Textarea
+						value={values.narration || ""}
+						onChange={(e) => {
+							set((v) => ({ ...v, narration: e.target.value }));
+						}}
+					/>
+				</FormControl>
+				<FormControl>
 					<FormLabel color={label}>Reference</FormLabel>
 					<Input
 						value={values.reference || ""}
 						onChange={(e) => {
 							set((v) => ({ ...v, reference: e.target.value }));
 						}}
-						type="number"
+						type="text"
 					/>
 				</FormControl>
 			</Stack>
