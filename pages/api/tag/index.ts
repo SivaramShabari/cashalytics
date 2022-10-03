@@ -10,7 +10,7 @@ export default async function handler(
 	try {
 		const session = await getSession({ req });
 		if (!session) {
-			console.log("No session in category/all");
+			console.error("No session in category/all");
 			res.status(401).json({ message: "Unauthorized" });
 		} else {
 			const email = session.user?.email;
@@ -31,7 +31,6 @@ export default async function handler(
 					res.status(201).send(tag);
 				} else if (req.method === "PUT") {
 					const tag = req.body;
-					console.log("PUT TAG", tag);
 					await prisma.tag.update({
 						data: { name: tag.name },
 						where: { id: tag.id },
@@ -67,7 +66,7 @@ export default async function handler(
 		}
 	} catch (err) {
 		res.status(500).send(err);
-		console.log("Error", err);
+		console.error("Error", err);
 	} finally {
 	}
 }

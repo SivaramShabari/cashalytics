@@ -9,7 +9,7 @@ export default async function handler(
 	try {
 		const session = await getSession({ req });
 		if (!session) {
-			console.log("No session in category/all");
+			console.error("No session in category/all");
 			res.status(401).json({ message: "Unauthorized" });
 		} else {
 			const email = session.user?.email;
@@ -28,8 +28,7 @@ export default async function handler(
 			}
 		}
 	} catch (e) {
-		console.log(e);
-
+		console.error(e);
 		res.status(509).json({ message: "Server error" });
 	} finally {
 	}

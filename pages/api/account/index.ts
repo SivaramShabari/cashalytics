@@ -9,7 +9,7 @@ export default async function handler(
 	try {
 		const session = await getSession({ req });
 		if (!session) {
-			console.log("No session in category/all");
+			console.error("No session in category/all");
 			res.status(401).json({ message: "Unauthorized" });
 		} else {
 			const email = session.user?.email;
@@ -54,7 +54,7 @@ export default async function handler(
 			}
 		}
 	} catch (err) {
-		console.log("Accounts API Error", err);
+		console.error("Accounts API Error", err);
 		res.status(500).send(err);
 	}
 }
